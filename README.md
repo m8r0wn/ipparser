@@ -41,7 +41,7 @@ IPParser Error: 'example'
 ['192.168.1.1', '72.30.35.10', '98.138.219.231', '98.137.246.7', '98.137.246.8', '72.30.35.9', '98.138.219.232']
 ```
 
-#### Argparse Integration
+## Argparse Integration
 * Standard Argument:
 ```python
 from ipparser import ipparser
