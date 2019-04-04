@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
     IPParser v0.1dev
     Author: @m8r0wn
@@ -7,7 +5,6 @@
     Released under BSD 3-Clause License, see LICENSE file for details
     Copyright (C) 2019 m8r0wn All rights reserved
 """
-
 from dns.resolver import Resolver
 from sys import stdout, exit
 from re import compile
