@@ -15,7 +15,8 @@ setup(
     license='BSD 3-clause',
     classifiers = [
         "Environment :: Console",
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License"
     ],
