@@ -1,6 +1,6 @@
 # IPParser
 
-The IPParser Python module was created to simplify accepting IPv4 addresses, DNS names, and target / host information at the command line. User inputs are taken and parsed to provide a list of IPv4 addresses or DNS names that can be used for iteration. If called with ```resolve=True```, ipparser will attempt to perform "A" record lookups and returns all IP addresses found for the host.
+The IPParser Python module was created to simplify accepting IPv4 addresses, DNS names, and target / host information when creating other security or network tools. User inputs are taken and parsed to provide a list of IPv4 addresses or DNS names that can be used for iteration. If called with ```resolve=True```, ipparser will attempt to perform "A" record lookups and returns all IP addresses found for the host.
 
 #### Inputs:
 IPParser currently accepts the following user inputs:
@@ -48,7 +48,8 @@ from ipparser import ipparser
 from argparse import ArgumentParser
 
 args = ArgumentParser(description='ipparser Integration with argparse')
-args.add_argument('-host', dest='host', default=False, type=lambda x: ipparser(x, resolve=True), help='Host Input')args = args.parse_args()
+args.add_argument('-host', dest='host', default=False, type=lambda x: ipparser(x, resolve=True), help='Host Input')
+args = args.parse_args()
 ```
 
 * Positional Argument:
