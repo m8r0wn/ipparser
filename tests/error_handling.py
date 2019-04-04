@@ -10,6 +10,7 @@ op.write('127.0.1\n')
 op.write('google\n')
 op.write('10.0.0.1,10.2\n')
 op.write('172.16.0.1-172.16.0.6\n')
+op.write('10.0.0.0/34\n')
 op.close()
 
 print("[ * ] Txt File with Intentional Errors")

@@ -27,7 +27,7 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
             if path.exists(host_input):
                 output = parse_txt(host_input, resolve, verbose, debug)
             else:
-                raise Exception('Input file not found')
+                raise Exception('Input file \'{}\' not found\n'.format(host_input))
 
         # Multiple (handle single IP & DNS names)
         elif "," in host_input:
@@ -44,19 +44,14 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
             else:
                 output = [host_input]
 
-        # Regex (only: /8, /16, /24 supported at this time)
+        # CIDR
         elif host_input[-2] == "/" or host_input[-3] == "/":
             if debug:
-                stdout.write("[-->] Input: {}, Classification: cidr\n".format(host_input))
-            mask = host_input.split("/")[1]
-            if mask == '24':
-                output = parse_cidr24(host_input)
-            elif mask == '16':
-                output = parse_cidr16(host_input)
-            elif mask == '8':
-                output = parse_cidr8(host_input)
-            else:
-                raise Exception('Invalid CIDR (Supported Ranges: /24, /16, /8)')
+                stdout.write("[-->] Input: {}, Classification: CIDR\n".format(host_input))
+            cidr = int(host_input.split("/")[1])
+            if cidr < 8 or cidr > 32:
+                raise Exception('Invalid CIDR detected \'{}\'\n'.format(host_input))
+            output = parse_cidr(host_input)
 
         # IP Range
         elif REGEX['range'].match(host_input):
@@ -71,11 +66,12 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
             output = [host_input]
 
         else:
-            raise Exception('Invalid or unsupported input provided : \'{}\''.format(host_input))
+            raise Exception('Invalid or unsupported input provided \'{}\'\n'.format(host_input))
     except KeyboardInterrupt:
         exit(0)
     except Exception as e:
-        return str("IPParser Error: {}".format(str(e)))
+        if verbose or debug:
+            stdout.write(str("IPParser Error: {}".format(str(e))))
     return output
 
 def parse_txt(host_input, resolve, verbose, debug):
@@ -86,40 +82,55 @@ def parse_txt(host_input, resolve, verbose, debug):
             tmp = ipparser(str(item).strip(), resolve, verbose, debug)
             if type(tmp) is list:
                 output = output + tmp
-            elif debug:
-                # debug > verbose
-                stdout.write("IPParser Error: \'{}\' ({}:{}), Reason: [{}]\n".format(str(item).strip(), host_input, str(tmp_file.index(item) + 1), tmp.split(":")[1]))
-            elif verbose:
-                stdout.write("IPParser Error: \'{}\' ({}:{})\n".format(str(item).strip(), host_input, str(tmp_file.index(item)+1)))
         except Exception as e:
-            if verbose:
+            if verbose or debug:
                 stdout.write(e)
     return output
 
-def parse_cidr24(host_input):
-    output = []
-    a = host_input.split("/")[0].split(".")
-    for x in range(0, 256):
-        tmp = a[0] + "." + a[1] + "." + a[2] + "." + str(x)
-        output.append(tmp)
-    return output
+def cidr_ranges(cidr):
+    a = []
+    b = []
+    c = []
+    div = (cidr//8)
+    mod = (cidr%8)
+    mod = abs(mod-8)
+    classes = {}
+    power = (2 ** mod)
+    if div == 4:
+        a = range(0,1)
+        b = range(0,1)
+        c = range(0,1)
+    elif div == 3:
+        a = range(0,1)
+        b = range(0,1)
+        c = range(0,power)
+    elif div ==2:
+        a = range(0,1)
+        b = range(0,power)
+        c = range(0,256)
+    elif div == 1:
+        a = range(0,power)
+        b = range(0,256)
+        c = range(0,256)
+    elif div == 0:
+        a = range(0,255)
+        b = range(0,255)
+        c = range(0,255)
+    classes["a"] = a
+    classes["b"] = b
+    classes["c"] = c
+    return classes
 
-def parse_cidr16(host_input):
+def parse_cidr(host_input):
     output = []
-    a = host_input.split("/")[0].split(".")
-    for x in range(0, 256):
-        for y in range(0, 256):
-            tmp = a[0] + "." + a[1] + "." + str(x) + "." + str(y)
-            output.append(tmp)
-    return output
-
-def parse_cidr8(host_input):
-    output = []
-    a = host_input.split("/")[0].split(".")
-    for x in range(0, 256):
-        for y in range(0, 256):
-            for z in range(0, 256):
-                tmp = a[0] + "." + str(x) + "." + str(y) + "." + str(z)
+    ip_base = host_input.split("/")[0]
+    cidr = int(host_input.split("/")[1])
+    ip_base = ip_base.split(".")
+    classes = cidr_ranges(cidr)
+    for a in classes["a"]:
+        for b in classes["b"]:
+            for c in classes["c"]:
+                tmp = ip_base[0] + "." + str(int(ip_base[1]) + a) + "." + str(int(ip_base[2]) + b) + "." + str(int(ip_base[3]) + c)
                 output.append(tmp)
     return output
 
@@ -141,13 +152,8 @@ def parse_multi(host_input, resolve, verbose, debug):
             tmp = ipparser(str(item).strip(), resolve, verbose, debug)
             if type(tmp) is list:
                 output = output + tmp
-            elif debug:
-                # debug > verbose
-                stdout.write("IPParser Error: \'{}\', Reason: [{}]\n".format(str(item).strip(), tmp.split(":")[1]))
-            elif verbose:
-                stdout.write("IPParser Error: \'{}\'\n".format(str(item).strip()))
         except Exception as e:
-            if verbose:
+            if verbose or debug:
                 stdout.write(e)
     return output
 
@@ -162,6 +168,6 @@ def parse_dnsname(host_input):
         for ip in dns_query:
             if REGEX['single'].match(str(ip)):
                 output.append(str(ip))
-    except Exception as e:
-        raise Exception('IPParser Error: Could not Resolve \'{}\''.format(host_input))
+    except:
+        raise Exception('Could not Resolve \'{}\''.format(host_input))
     return output

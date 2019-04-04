@@ -29,15 +29,10 @@ tmp = len(ipparser('192.168.1.0/24', resolve=False, debug=True))
 print("[<--] count: {}\n".format(tmp))
 
 
-print("[ * ] CIDR /16")
+print("[ * ] CIDR /19")
 print("[ * ] Resolve=False, Verbose=False, Debug=True")
 tmp = len(ipparser('192.168.1.0/16', resolve=False, debug=True))
 print("[<--] count: {}\n".format(tmp))
-
-
-#print("[ * ] CIDR /8") #(Takes a long time to calculate, use only as needed)
-#tmp = len(ipparser.ipparser('192.168.1.0/8', resolve=True, debug=True))
-#print("[<--] count: {}\n".format(tmp))
 
 
 print("[ * ] IP Range")

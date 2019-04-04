@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='ipparser',
-    version='0.1',
+    version='0.2dev',
     author = 'm8r0wn',
     author_email = 'm8r0wn@protonmail.com',
     description = 'Parse IP address information and return a list for iteration.',
