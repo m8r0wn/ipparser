@@ -83,4 +83,4 @@ args = args.parse_args()
 ```
 
 ## Contributors
-* @darneymartin
+* [@darneymartin](https://github.com/darneymartin)
