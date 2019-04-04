@@ -13,6 +13,10 @@ IPParser currently accepts the following user inputs:
 
 ## Install
 ```bash
+pip3 install ipparser
+```
+OR 
+```bash
 git clone https://github.com/m8r0wn/ipparser
 cd ipparser
 python3 setup.py install
