@@ -59,7 +59,7 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
             elif mask == '8':
                 output = parse_cidr8(host_input)
             else:
-                raise Exception('Invalid CIDR (Supported Ranges: /24, /16, /18)')
+                raise Exception('Invalid CIDR (Supported Ranges: /24, /16, /8)')
 
         # IP Range
         elif REGEX['range'].match(host_input):
