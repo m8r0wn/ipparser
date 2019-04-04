@@ -30,6 +30,9 @@ python3 setup.py install
 >>> ipparser('example', resolve=True, verbose=True)
 "IPParser Error: Invalid or unsupported input provided : 'example'"
 
+>>> ipparser('192.168.1.1,yahoo.com')
+['192.168.1.1', 'yahoo.com']
+
 >>> ipparser('192.168.1.1,yahoo.com,example', resolve=True, verbose=True)
 IPParser Error: 'example'
 ['192.168.1.1', '98.137.246.7', '72.30.35.10', '98.137.246.8', '98.138.219.231', '98.138.219.232', '72.30.35.9']
