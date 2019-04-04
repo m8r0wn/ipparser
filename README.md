@@ -51,8 +51,8 @@ IPParser Error: 'example'
 from ipparser import ipparser
 from argparse import ArgumentParser
 
-args = ArgumentParser(description='ipparser Integration with argparse')
-args.add_argument('-host', dest='host', default=False, type=lambda x: ipparser(x, resolve=True), help='Host Input')
+args = ArgumentParser(description='ipparser integration with argparse')
+args.add_argument('-host', dest='host', default=False, type=lambda x: ipparser(x), help='Host Input')
 args = args.parse_args()
 ```
 
@@ -61,7 +61,23 @@ args = args.parse_args()
 from ipparser import ipparser
 from argparse import ArgumentParser
 
-args = ArgumentParser(description='ipparser Integration with argparse')
-args.add_argument(dest='positional_host', nargs='+', type=lambda x: ipparser(x, resolve=False, verbose=True), help='Host Input')
+args = ArgumentParser(description='ipparser integration with argparse')
+args.add_argument(dest='positional_host', nargs='+', type=lambda x: ipparser(x, resolve=False), help='Host Input')
+args = args.parse_args()
+```
+
+* Allow user to choose resolve setting:
+```python
+from sys import arg
+from ipparser import ipparser
+from argparse import ArgumentParser
+
+r = False
+if "-r" in argv:
+    r = True
+    
+args = ArgumentParser(description='ipparser integration with argparse')
+args.add_argument('-r', dest='resolve',action='store_true', help='Resolve input DNS hosts')
+args.add_argument(dest='positional_host', nargs='+', type=lambda x: ipparser(x, resolve=r), help='Host Input')
 args = args.parse_args()
 ```
