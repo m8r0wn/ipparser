@@ -22,7 +22,14 @@ cd ipparser
 python3 setup.py install
 ```
 
-## Example Usage
+## Usage:
+The IPParser function can be called with the following arguments (shown with their default values):
+* ```resolve=False``` - Resolve any DNS names identified, to IPv4 addresses, and append to output.
+* ```silent=False``` - Do not show errors while parsing.
+* ```exit_on_error=True``` - Exit on errors found while parsing user input.
+* ```debug=False``` - Show input classification for debugging.
+
+## Examples
 ```python
 >>> from ipparser import ipparser
 >>> ipparser('192.168.1.3-5')
@@ -31,17 +38,17 @@ python3 setup.py install
 >>> ipparser('yahoo.com',resolve=True)
 ['98.138.219.232', '98.138.219.231', '72.30.35.9', '72.30.35.10', '98.137.246.7', '98.137.246.8']
 
->>> ipparser('example', resolve=True, verbose=True)
-"IPParser Error: Invalid or unsupported input provided : 'example'"
+>>> ipparser('example', resolve=True, exit_on_error=False)
+IPParser Error: Invalid or unsupported input provided 'example'
 
 >>> ipparser('192.168.1.1,yahoo.com')
 ['192.168.1.1', 'yahoo.com']
 
->>> ipparser('192.168.1.1,yahoo.com,example', resolve=True, verbose=True)
-IPParser Error: 'example'
-['192.168.1.1', '98.137.246.7', '72.30.35.10', '98.137.246.8', '98.138.219.231', '98.138.219.232', '72.30.35.9']
+ipparser('192.168.1.1,yahoo.com,example', resolve=True, exit_on_error=False)
+IPParser Error: Invalid or unsupported input provided 'example'
+['192.168.1.1', '98.138.219.231', '98.137.246.8', '98.137.246.7', '72.30.35.9', '98.138.219.232', '72.30.35.10']
 
->>> ipparser('192.168.1.1,yahoo.com,example', resolve=True)
+>>> ipparser('192.168.1.1,yahoo.com,example', resolve=True, silent=True)
 ['192.168.1.1', '72.30.35.10', '98.138.219.231', '98.137.246.7', '98.137.246.8', '72.30.35.9', '98.138.219.232']
 ```
 
@@ -88,7 +95,7 @@ positional_host=['192.168.1.1'])
 
 * Allow user args to determine resolve setting:
 ```python
-from sys import arg
+from sys import argv
 from ipparser import ipparser
 from argparse import ArgumentParser
 

@@ -1,5 +1,5 @@
 """
-    IPParser v0.1dev
+    IPParser v0.3
     Author: @m8r0wn
     https://github.com/m8r0wn/ipparser
     Released under BSD 3-Clause License, see LICENSE file for details
@@ -16,7 +16,7 @@ REGEX = {
     'dns'   : compile("^.+\.[a-z|A-Z]{2,}$")
 }
 
-def ipparser(host_input, resolve=False, verbose=False, debug=False):
+def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=False):
     host_input = str(host_input).strip()
     output = []
     try:
@@ -25,7 +25,7 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
             if debug:
                 stdout.write("[-->] Input: {}, Classification: txt\n".format(host_input))
             if path.exists(host_input):
-                output = parse_txt(host_input, resolve, verbose, debug)
+                output = parse_txt(host_input, resolve, silent,exit_on_error, debug)
             else:
                 raise Exception('Input file \'{}\' not found\n'.format(host_input))
 
@@ -33,7 +33,7 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
         elif "," in host_input:
             if debug:
                 stdout.write("[-->] Input: {}, Classification: multi\n".format(host_input))
-            output = parse_multi(host_input, resolve, verbose, debug)
+            output = parse_multi(host_input, resolve, silent, exit_on_error, debug)
 
         # DNS Name
         elif REGEX['dns'].match(host_input) and "," not in host_input:
@@ -70,21 +70,25 @@ def ipparser(host_input, resolve=False, verbose=False, debug=False):
     except KeyboardInterrupt:
         exit(0)
     except Exception as e:
-        if verbose or debug:
+        if not silent:
             stdout.write(str("IPParser Error: {}".format(str(e))))
+        if exit_on_error:
+            exit(1)
     return output
 
-def parse_txt(host_input, resolve, verbose, debug):
+def parse_txt(host_input, resolve, silent, exit_on_error, debug):
     output = []
     tmp_file = [line.strip() for line in open(host_input)]
     for item in tmp_file:
         try:
-            tmp = ipparser(str(item).strip(), resolve, verbose, debug)
+            tmp = ipparser(str(item).strip(), resolve, silent, exit_on_error, debug)
             if type(tmp) is list:
                 output = output + tmp
         except Exception as e:
-            if verbose or debug:
-                stdout.write(e)
+            if not silent:
+                stdout.write(str("IPParser Error: {}".format(str(e))))
+            if exit_on_error:
+                exit(1)
     return output
 
 def cidr_ranges(cidr):
@@ -145,16 +149,18 @@ def parse_iprange(host_input):
         output.append(tmp)
     return output
 
-def parse_multi(host_input, resolve, verbose, debug):
+def parse_multi(host_input, resolve, silent, exit_on_error, debug):
     output = []
     for item in host_input.split(","):
         try:
-            tmp = ipparser(str(item).strip(), resolve, verbose, debug)
+            tmp = ipparser(str(item).strip(), resolve, silent, exit_on_error, debug)
             if type(tmp) is list:
                 output = output + tmp
         except Exception as e:
-            if verbose or debug:
-                stdout.write(e)
+            if not silent:
+                stdout.write(str("IPParser Error: {}".format(str(e))))
+            if exit_on_error:
+                exit(1)
     return output
 
 def parse_dnsname(host_input):
