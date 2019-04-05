@@ -22,7 +22,7 @@ cd ipparser
 python3 setup.py install
 ```
 
-## Usage
+## Example Usage
 ```python
 >>> from ipparser import ipparser
 >>> ipparser('192.168.1.3-5')
@@ -55,8 +55,11 @@ args = ArgumentParser(description='ipparser integration with argparse')
 args.add_argument('-host', dest='host', default=False, type=lambda x: ipparser(x), help='Host Input')
 args = args.parse_args()
 ```
+```
+Namespace(host=['192.168.1.1'])
+```
 
-* Positional Argument:
+* Required Positional Argument (Method 1):
 ```python
 from ipparser import ipparser
 from argparse import ArgumentParser
@@ -65,8 +68,25 @@ args = ArgumentParser(description='ipparser integration with argparse')
 args.add_argument(dest='positional_host', nargs='+', type=lambda x: ipparser(x, resolve=False), help='Host Input')
 args = args.parse_args()
 ```
+```
+Namespace(positional_host=[['192.168.1.1']])
+```
 
-* Allow user to choose resolve setting:
+* Required Positional Argument (Method 2):
+```python
+from ipparser import ipparser
+from argparse import ArgumentParser
+
+args = ArgumentParser(description='ipparser integration with argparse')
+args.add_argument(dest='positional_host', nargs='+', help='Host Input')
+args = args.parse_args()
+args.positional_host = ipparser(args.positional_host[0]) 
+```
+```
+positional_host=['192.168.1.1'])
+```
+
+* Allow user args to determine resolve setting:
 ```python
 from sys import arg
 from ipparser import ipparser
@@ -80,6 +100,30 @@ args = ArgumentParser(description='ipparser integration with argparse')
 args.add_argument('-r', dest='resolve',action='store_true', help='Resolve input DNS hosts')
 args.add_argument(dest='positional_host', nargs='+', type=lambda x: ipparser(x, resolve=r), help='Host Input')
 args = args.parse_args()
+```
+
+## Sys.argv Usage
+* Standard Argument
+```python
+from sys import argv
+from ipparser import ipparser
+
+if "-host" in argv:
+    host = ipparser(argv[argv.index("-host") + 1])
+```
+```
+host = ['192.168.1.1']
+```
+
+* Positional Argument
+```python
+from sys import argv
+from ipparser import ipparser
+
+host = ipparser(argv[-1])
+```
+```
+host = ['192.168.1.1']
 ```
 
 ## Contributors
