@@ -1,5 +1,5 @@
 """
-    IPParser v0.3.1
+    IPParser v0.3.2
     Author: @m8r0wn
     https://github.com/m8r0wn/ipparser
     Released under BSD 3-Clause License, see LICENSE file for details
@@ -64,11 +64,13 @@ def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_
             if debug:
                 stdout.write("[-->] Input: {}, Classification: Single\n".format(host_input))
             output = [host_input]
+
         # Single IP + Port ("127.0.0.1:8080")
-        if allow_port and ":" in host_input:
+        elif allow_port and ":" in host_input:
             if debug:
                 stdout.write("[-->] Input: {}, Classification: Port\n".format(host_input))
             output = verify_port(host_input, silent, exit_on_error)
+
         else:
             raise Exception('Invalid or unsupported input provided: \'{}\'\n'.format(host_input))
     except KeyboardInterrupt:
