@@ -1,5 +1,5 @@
 """
-    IPParser v0.3
+    IPParser v0.3.1
     Author: @m8r0wn
     https://github.com/m8r0wn/ipparser
     Released under BSD 3-Clause License, see LICENSE file for details
@@ -16,29 +16,29 @@ REGEX = {
     'dns'   : compile("^.+\.[a-z|A-Z]{2,}$")
 }
 
-def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=False):
+def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_error=True, debug=False):
     host_input = str(host_input).strip()
     output = []
     try:
         # TXT File
         if host_input.endswith(('.txt')):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: txt\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: .txt File\n".format(host_input))
             if path.exists(host_input):
                 output = parse_txt(host_input, resolve, silent,exit_on_error, debug)
             else:
-                raise Exception('Input file \'{}\' not found\n'.format(host_input))
+                raise Exception('Input file: \'{}\' not found\n'.format(host_input))
 
         # Multiple (handle single IP & DNS names)
         elif "," in host_input:
             if debug:
-                stdout.write("[-->] Input: {}, Classification: multi\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: Multi\n".format(host_input))
             output = parse_multi(host_input, resolve, silent, exit_on_error, debug)
 
         # DNS Name
         elif REGEX['dns'].match(host_input) and "," not in host_input:
             if debug:
-                stdout.write("[-->] Input: {}, Classification: dns\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: DNS\n".format(host_input))
             if resolve:
                 output = parse_dnsname(host_input)
             else:
@@ -50,7 +50,7 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
                 stdout.write("[-->] Input: {}, Classification: CIDR\n".format(host_input))
             cidr = int(host_input.split("/")[1])
             if cidr < 8 or cidr > 32:
-                raise Exception('Invalid CIDR detected \'{}\'\n'.format(host_input))
+                raise Exception('Invalid CIDR detected: \'{}\'\n'.format(host_input))
             output = parse_cidr(host_input)
 
         # IP Range
@@ -62,11 +62,16 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
         # Single IP
         elif REGEX['single'].match(host_input):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: single\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: Single\n".format(host_input))
             output = [host_input]
+        # Single IP + Port ("127.0.0.1:8080")
+        if allow_port and ":" in host_input:
+            if debug:
+                stdout.write("[-->] Input: {}, Classification: Port\n".format(host_input))
+            output = verify_port(host_input, silent, exit_on_error)
 
         else:
-            raise Exception('Invalid or unsupported input provided \'{}\'\n'.format(host_input))
+            raise Exception('Invalid or unsupported input provided: \'{}\'\n'.format(host_input))
     except KeyboardInterrupt:
         exit(0)
     except Exception as e:
@@ -86,7 +91,7 @@ def parse_txt(host_input, resolve, silent, exit_on_error, debug):
                 output = output + tmp
         except Exception as e:
             if not silent:
-                stdout.write(str("IPParser Error: {}".format(str(e))))
+                stdout.write(str("IPParser Error: {}\n".format(str(e))))
             if exit_on_error:
                 exit(1)
     return output
@@ -142,7 +147,7 @@ def parse_iprange(host_input):
     output = []
     a = host_input.split("-")
     if not REGEX['single'].match(a[0]) or int(a[1]) > 255:
-        raise Exception('IPParser Error: Invalid IP range')
+        raise Exception('IPParser Error: Invalid IP range\n')
     b = a[0].split(".")
     for x in range(int(b[3]), int(a[1])+1):
         tmp = b[0] + "." + b[1] + "." + b[2] + "."+ str(x)
@@ -158,7 +163,7 @@ def parse_multi(host_input, resolve, silent, exit_on_error, debug):
                 output = output + tmp
         except Exception as e:
             if not silent:
-                stdout.write(str("IPParser Error: {}".format(str(e))))
+                stdout.write(str("IPParser Error: {}\n".format(str(e))))
             if exit_on_error:
                 exit(1)
     return output
@@ -175,5 +180,18 @@ def parse_dnsname(host_input):
             if REGEX['single'].match(str(ip)):
                 output.append(str(ip))
     except:
-        raise Exception('Could not Resolve \'{}\''.format(host_input))
+        raise Exception('Could not Resolve \'{}\'\n'.format(host_input))
     return output
+
+def verify_port(host_input, silent, exit_on_error):
+    try:
+        tmp = host_input.split(":")
+        if REGEX['single'].match(tmp[0]) and int(tmp[1]):
+                return [host_input]
+        else:
+            raise Exception("Failed to extract port from: \'{}\'\n".format(host_input))
+    except Exception as e:
+        if not silent:
+            stdout.write(str("IPParser Error: {}".format(str(e))))
+        if exit_on_error:
+            exit(1)
