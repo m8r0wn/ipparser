@@ -69,7 +69,6 @@ def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_
             if debug:
                 stdout.write("[-->] Input: {}, Classification: Port\n".format(host_input))
             output = verify_port(host_input, silent, exit_on_error)
-
         else:
             raise Exception('Invalid or unsupported input provided: \'{}\'\n'.format(host_input))
     except KeyboardInterrupt:
