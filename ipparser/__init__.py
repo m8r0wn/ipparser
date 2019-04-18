@@ -1,5 +1,5 @@
 """
-    IPParser v0.3.2
+    IPParser v0.3.3
     Author: @m8r0wn
     https://github.com/m8r0wn/ipparser
     Released under BSD 3-Clause License, see LICENSE file for details
@@ -25,7 +25,7 @@ def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_
             if debug:
                 stdout.write("[-->] Input: {}, Classification: .txt File\n".format(host_input))
             if path.exists(host_input):
-                output = parse_txt(host_input, resolve, silent,exit_on_error, debug)
+                output = parse_txt(host_input, resolve, allow_port, silent,exit_on_error, debug)
             else:
                 raise Exception('Input file: \'{}\' not found\n'.format(host_input))
 
@@ -33,7 +33,7 @@ def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_
         elif "," in host_input:
             if debug:
                 stdout.write("[-->] Input: {}, Classification: Multi\n".format(host_input))
-            output = parse_multi(host_input, resolve, silent, exit_on_error, debug)
+            output = parse_multi(host_input, resolve, allow_port, silent, exit_on_error, debug)
 
         # DNS Name
         elif REGEX['dns'].match(host_input) and "," not in host_input:
@@ -82,12 +82,12 @@ def ipparser(host_input, resolve=False, allow_port=False, silent=False, exit_on_
             exit(1)
     return output
 
-def parse_txt(host_input, resolve, silent, exit_on_error, debug):
+def parse_txt(host_input, resolve, allow_port, silent, exit_on_error, debug):
     output = []
     tmp_file = [line.strip() for line in open(host_input)]
     for item in tmp_file:
         try:
-            tmp = ipparser(str(item).strip(), resolve, silent, exit_on_error, debug)
+            tmp = ipparser(str(item).strip(), resolve, allow_port, silent, exit_on_error, debug)
             if type(tmp) is list:
                 output = output + tmp
         except Exception as e:
@@ -155,11 +155,11 @@ def parse_iprange(host_input):
         output.append(tmp)
     return output
 
-def parse_multi(host_input, resolve, silent, exit_on_error, debug):
+def parse_multi(host_input, resolve, allow_port, silent, exit_on_error, debug):
     output = []
     for item in host_input.split(","):
         try:
-            tmp = ipparser(str(item).strip(), resolve, silent, exit_on_error, debug)
+            tmp = ipparser(str(item).strip(), resolve, allow_port, silent, exit_on_error, debug)
             if type(tmp) is list:
                 output = output + tmp
         except Exception as e:
