@@ -8,8 +8,10 @@ IPParser currently accepts the following user inputs:
 * IP ranges (192.168.1.1-55)
 * Multiple IP's (192.168.1.3,192.168.1.7,m8r0wn.com)
 * CIDR Ranges /8-/32 (192.168.1.0/24)
+* URL's (https://m8r0wn.com/demo)
+* IP:Port (192.168.1.1:8080)
 * DNS Names (m8r0wn.com)
-* .txt files (Containing any of the items listed)
+* TXT files (Containing any of the items listed)
 
 ## Install
 ```bash
