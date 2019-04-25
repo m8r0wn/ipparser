@@ -25,7 +25,6 @@ python3 setup.py install
 ## Usage:
 The IPParser function can be called with the following arguments (shown with their default values):
 * ```resolve=False``` - Resolve any DNS names identified, to IPv4 addresses, and append to output.
-* ```allow_port=False``` - Accept IP:Port input, ex. ```192.168.1.1:8080```
 * ```silent=False``` - Do not show errors while parsing.
 * ```exit_on_error=True``` - Exit on errors found while parsing user input.
 * ```debug=False``` - Show input classification for debugging.

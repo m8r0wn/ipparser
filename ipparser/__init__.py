@@ -1,5 +1,5 @@
 """
-    IPParser v0.3.4
+    IPParser v0.3.5
     Author: @m8r0wn
     https://github.com/m8r0wn/ipparser
     Released under BSD 3-Clause License, see LICENSE file for details
@@ -13,6 +13,7 @@ from os import path
 REGEX = {
     'single': compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"),
     'range' : compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}$"),
+    'cidr' : compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$"),
     'dns'   : compile("^.+\.[a-z|A-Z]{2,}$")
 }
 
@@ -23,7 +24,7 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
         # TXT File
         if host_input.endswith(('.txt')):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: .txt File\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: TXT File\n".format(host_input))
             if path.exists(host_input):
                 output = parse_txt(host_input, resolve, silent,exit_on_error, debug)
             else:
@@ -45,7 +46,7 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
                 output = [host_input]
 
         # CIDR
-        elif host_input[-2] == "/" or host_input[-3] == "/":
+        elif REGEX['cidr'].match(host_input):
             if debug:
                 stdout.write("[-->] Input: {}, Classification: CIDR\n".format(host_input))
             cidr = int(host_input.split("/")[1])
@@ -56,13 +57,13 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
         # IP Range
         elif REGEX['range'].match(host_input):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: range\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: Range\n".format(host_input))
             output = parse_iprange(host_input)
 
         else:
             # Single IP - 127.0.0.1, URL - http://, Port - 127.0.0.1:8080
             if debug:
-                stdout.write("[-->] Input: {}, Classification: other\n".format(host_input))
+                stdout.write("[-->] Input: {}, Classification: Other\n".format(host_input))
             output = [host_input]
 
     except KeyboardInterrupt:
