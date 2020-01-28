@@ -1,14 +1,9 @@
-"""
-    IPParser v0.3.5
-    Author: @m8r0wn
-    https://github.com/m8r0wn/ipparser
-    Released under BSD 3-Clause License, see LICENSE file for details
-    Copyright (C) 2019 m8r0wn All rights reserved
-"""
-from dns.resolver import Resolver
-from sys import stdout, exit
-from re import compile
 from os import path
+from re import compile
+from sys import stdout, exit
+from dns.resolver import Resolver
+from ipparser.cidr import parse_cidr
+from ipparser.nmap import parse_nmap
 
 REGEX = {
     'single': compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"),
@@ -17,29 +12,45 @@ REGEX = {
     'dns'   : compile("^.+\.[a-z|A-Z]{2,}$")
 }
 
-def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=False):
+def ipparser(host_input, resolve=False, open_ports=False, silent=False, exit_on_error=True, debug=False):
+    '''
+    :param host_input: User Input
+    :param resolve: Resolve DNS names
+    :param open_ports: Return IP:Port notation for all open ports found (Nmap XML only)
+    :param silent: Show error messages during parsing
+    :param exit_on_error: Exit when error found
+    :param debug: Show debug messages/input classifications
+    '''
     host_input = str(host_input).strip()
     output = []
     try:
         # TXT File
-        if host_input.endswith(('.txt')):
+        if host_input.lower().endswith('.txt'):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: TXT File\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: TXT File\n".format(host_input))
             if path.exists(host_input):
                 output = parse_txt(host_input, resolve, silent,exit_on_error, debug)
+            else:
+                raise Exception('Input file: \'{}\' not found\n'.format(host_input))
+
+        # Nmap XML File
+        elif host_input.lower().endswith('.xml'):
+            stdout.write("[-->] IPParser: {} :: XML File\n".format(host_input))
+            if path.exists(host_input):
+                output = parse_nmap(host_input, open_ports)
             else:
                 raise Exception('Input file: \'{}\' not found\n'.format(host_input))
 
         # Multiple (handle single IP & DNS names)
         elif "," in host_input:
             if debug:
-                stdout.write("[-->] Input: {}, Classification: Multi\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: Multi\n".format(host_input))
             output = parse_multi(host_input, resolve, silent, exit_on_error, debug)
 
         # DNS Name
         elif REGEX['dns'].match(host_input) and "," not in host_input:
             if debug:
-                stdout.write("[-->] Input: {}, Classification: DNS\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: DNS\n".format(host_input))
             if resolve:
                 output = parse_dnsname(host_input)
             else:
@@ -48,7 +59,7 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
         # CIDR
         elif REGEX['cidr'].match(host_input):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: CIDR\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: CIDR\n".format(host_input))
             cidr = int(host_input.split("/")[1])
             if cidr < 8 or cidr > 32:
                 raise Exception('Invalid CIDR detected: \'{}\'\n'.format(host_input))
@@ -57,13 +68,13 @@ def ipparser(host_input, resolve=False, silent=False, exit_on_error=True, debug=
         # IP Range
         elif REGEX['range'].match(host_input):
             if debug:
-                stdout.write("[-->] Input: {}, Classification: Range\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: IP Range\n".format(host_input))
             output = parse_iprange(host_input)
 
         else:
             # Single IP - 127.0.0.1, URL - http://, Port - 127.0.0.1:8080
             if debug:
-                stdout.write("[-->] Input: {}, Classification: Other\n".format(host_input))
+                stdout.write("[-->] IPParser: {} :: Other\n".format(host_input))
             output = [host_input]
 
     except KeyboardInterrupt:
@@ -88,53 +99,6 @@ def parse_txt(host_input, resolve, silent, exit_on_error, debug):
                 stdout.write(str("IPParser Error: {}\n".format(str(e))))
             if exit_on_error:
                 exit(1)
-    return output
-
-def cidr_ranges(cidr):
-    a = []
-    b = []
-    c = []
-    div = (cidr//8)
-    mod = (cidr%8)
-    mod = abs(mod-8)
-    classes = {}
-    power = (2 ** mod)
-    if div == 4:
-        a = range(0,1)
-        b = range(0,1)
-        c = range(0,1)
-    elif div == 3:
-        a = range(0,1)
-        b = range(0,1)
-        c = range(0,power)
-    elif div ==2:
-        a = range(0,1)
-        b = range(0,power)
-        c = range(0,256)
-    elif div == 1:
-        a = range(0,power)
-        b = range(0,256)
-        c = range(0,256)
-    elif div == 0:
-        a = range(0,255)
-        b = range(0,255)
-        c = range(0,255)
-    classes["a"] = a
-    classes["b"] = b
-    classes["c"] = c
-    return classes
-
-def parse_cidr(host_input):
-    output = []
-    ip_base = host_input.split("/")[0]
-    cidr = int(host_input.split("/")[1])
-    ip_base = ip_base.split(".")
-    classes = cidr_ranges(cidr)
-    for a in classes["a"]:
-        for b in classes["b"]:
-            for c in classes["c"]:
-                tmp = ip_base[0] + "." + str(int(ip_base[1]) + a) + "." + str(int(ip_base[2]) + b) + "." + str(int(ip_base[3]) + c)
-                output.append(tmp)
     return output
 
 def parse_iprange(host_input):
