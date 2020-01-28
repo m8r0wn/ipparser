@@ -12,6 +12,7 @@ IPParser currently accepts the following user inputs:
 * IP:Port (192.168.1.1:8080)
 * DNS Names (m8r0wn.com)
 * TXT files (Containing any of the items listed)
+* Nmap XML Reports
 
 ## Install
 ```bash
@@ -27,6 +28,7 @@ python3 setup.py install
 ## Usage:
 The IPParser function can be called with the following arguments (shown with their default values):
 * ```resolve=False``` - Resolve any DNS names identified, to IPv4 addresses, and append to output.
+* ```open_ports=False``` - Return IP:Port notation for all open ports found (Nmap XML only)
 * ```silent=False``` - Do not show errors while parsing.
 * ```exit_on_error=True``` - Exit on errors found while parsing user input.
 * ```debug=False``` - Show input classification for debugging.
