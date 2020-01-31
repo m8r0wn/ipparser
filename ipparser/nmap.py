@@ -87,7 +87,7 @@ def parse_nmap(filename, open_ports):
                     else:
                         output.append(a)
 
-    return output
+    return list(set(output))
 
 
 

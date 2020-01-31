@@ -35,7 +35,8 @@ def ipparser(host_input, resolve=False, open_ports=False, silent=False, exit_on_
 
         # Nmap XML File
         elif host_input.lower().endswith('.xml'):
-            stdout.write("[-->] IPParser: {} :: XML File\n".format(host_input))
+            if debug:
+                stdout.write("[-->] IPParser: {} :: XML File\n".format(host_input))
             if path.exists(host_input):
                 output = parse_nmap(host_input, open_ports)
             else:
