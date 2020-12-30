@@ -56,19 +56,19 @@ class NmapParseXML(xml.sax.handler.ContentHandler):
         return
 
     def endElement(self,tag):
-        if tag == 'host':
-            self.list_hosts.append(self.host)
-            self.host = False
+        if self.host:
+            if tag == 'host':
+                self.list_hosts.append(self.host)
+                self.host = False
 
-        elif tag == 'hostname' or tag == 'address':
-            self.host['hosts'].append(self.hostname)
+            elif tag == 'hostname' or tag == 'address':
+                self.host['hosts'].append(self.hostname)
 
-        elif tag == 'port':
-            self.host['ports'].append(self.port)
+            elif tag == 'port':
+                self.host['ports'].append(self.port)
 
 def parse_nmap(filename, open_ports):
     output = []
-
     parser = xml.sax.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, 0)
     Handler = NmapParseXML()
@@ -86,7 +86,6 @@ def parse_nmap(filename, open_ports):
                                 output.append("{}:{}".format(a, port['portid']))
                     else:
                         output.append(a)
-
     return list(set(output))
 
 

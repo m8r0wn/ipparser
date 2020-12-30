@@ -12,10 +12,12 @@ REGEX = {
     'dns'   : compile("^.+\.[a-z|A-Z]{2,}$")
 }
 
-def ipparser(host_input, resolve=False, open_ports=False, silent=False, exit_on_error=True, debug=False):
+def ipparser(host_input, resolve=False, open_ports=False, silent=False, exit_on_error=True, ns=[], debug=False):
     '''
+    Take in host/target inputs and return an array for easy iteration.
     :param host_input: User Input
     :param resolve: Resolve DNS names
+    :param ns: Define nameservers for resolving DNS names
     :param open_ports: Return IP:Port notation for all open ports found (Nmap XML only)
     :param silent: Show error messages during parsing
     :param exit_on_error: Exit when error found
@@ -53,7 +55,7 @@ def ipparser(host_input, resolve=False, open_ports=False, silent=False, exit_on_
             if debug:
                 stdout.write("[-->] IPParser: {} :: DNS\n".format(host_input))
             if resolve:
-                output = parse_dnsname(host_input)
+                output = parse_dnsname(host_input, ns=ns)
             else:
                 output = [host_input]
 
@@ -127,15 +129,15 @@ def parse_multi(host_input, resolve, silent, exit_on_error, debug):
                 exit(1)
     return output
 
-def parse_dnsname(host_input):
+def parse_dnsname(host_input, ns=[]):
     output = []
     try:
         res = Resolver()
         res.timeout = 3
         res.lifetime = 3
-        dns_query = res.query(host_input, "A")
-        dns_query.nameservers = ['8.8.8.8', '8.8.4.4']
-        for ip in dns_query:
+        if ns:
+            res.nameservers = ns
+        for ip in res.query(host_input, "A"):
             if REGEX['single'].match(str(ip)):
                 output.append(str(ip))
     except:
